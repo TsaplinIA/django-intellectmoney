@@ -57,6 +57,10 @@ def receive_result(request):
         _send_admin_email(subject, u'Дата: {}'.format(info))
         return HttpResponse('OK')
 
+    if not invoice.paymentId:
+        invoice.paymentId = paymentId
+        invoice.save()
+
     paymentStatus = data['paymentStatus']
     if paymentStatus in [5, 6, 7]:
         subject = u'Оплата через intellectmoney #{}'.format(paymentId)

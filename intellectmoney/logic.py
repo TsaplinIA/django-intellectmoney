@@ -81,8 +81,6 @@ def _parse_response(data):
     if operation_state != ServiceOperationState.SUCCESS:
         raise Exception
 
-    operation_id = data.get('OperationId')
-    eshop_id = data.get('EshopId')
     result = data.get('Result')
     return result
 
