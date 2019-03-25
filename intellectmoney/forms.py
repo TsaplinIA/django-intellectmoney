@@ -2,7 +2,6 @@
 import datetime
 
 from django import forms
-
 from intellectmoney import settings
 from intellectmoney.helpers import checkHashOnReceiveResult, getHashOnRequest
 
@@ -25,8 +24,7 @@ class _BasePaymentForm(_BaseForm):
     serviceName = forms.CharField(label=u'Payment Description', required=False)
     recipientAmount = forms.DecimalField(max_digits=10, decimal_places=2)
     recipientCurrency = forms.ChoiceField(
-        choices=CURRENCY_CHOICES,
-        initial=settings.DEBUG and 'TST' or 'RUB'
+        choices=CURRENCY_CHOICES, initial=settings.DEBUG and 'TST' or 'RUB'
     )
     userName = forms.CharField(max_length=255, required=False)
     userEmail = forms.EmailField(required=False)
@@ -69,7 +67,6 @@ class IntellectMoneyForm(_BasePaymentForm):
         (PREFERENCE_TRANSFERS, u'Transfers'),
         (PREFERENCE_SMS, 'SMS'),
         (PREFERENCE_BANK, u'Bank'),
-
         # exchangers
         (PREFERENCE_TELEMONEY, 'Telemoney'),
         (PREFERENCE_RBKMONEY, 'RBKMoney'),
@@ -86,29 +83,31 @@ class IntellectMoneyForm(_BasePaymentForm):
         (PREFERENCE_MOBIMONEY, u'С баланса телефона'),
         (PREFERENCE_RAPIDA, u'В салонах связи'),
         (PREFERENCE_ALFACLICK, u'AlfaClick'),
-
         # groups
         ('inner,bankCard,exchangers,terminals,bank,transfers,sms', u'All'),
         ('bankCard,exchangers,terminals,bank,transfers,sms', u'All without inner'),
     ]
 
+    RECCURING_TYPE_ACTIVATE = 'Activate'
+    RECCURING_TYPE_CHOICES = (
+        (RECCURING_TYPE_ACTIVATE, RECCURING_TYPE_ACTIVATE),
+    )
+
     successUrl = forms.CharField(
-        required=False, max_length=512,
-        initial=settings.SUCCESS_URL
+        required=False, max_length=512, initial=settings.SUCCESS_URL
     )
-    failUrl = forms.CharField(
-        required=False, max_length=512,
-        initial=settings.FAIL_URL
-    )
+    failUrl = forms.CharField(required=False, max_length=512, initial=settings.FAIL_URL)
     preference = forms.ChoiceField(
         label=u'Payment Method', choices=PREFERENCE_CHOICES, required=False
     )
     expireDate = forms.DateTimeField(required=False)
-    holdMode = forms.BooleanField(required=False,
-                                  initial=settings.HOLD_MODE)
+    holdMode = forms.BooleanField(required=False, initial=settings.HOLD_MODE)
+    holdTime = forms.IntegerField(required=False, min_value=0, max_value=119)
     hash = forms.CharField(required=settings.REQUIRE_HASH)
     merchantReceipt = forms.CharField(required=False)
-    customerContract = forms.CharField(required=False)
+    frame = forms.IntegerField(required=False, min_value=0, max_value=1)
+    reccuringType = forms.ChoiceField(required=False, choices=RECCURING_TYPE_CHOICES)
+    customerContact = forms.CharField(required=False)
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.setdefault('initial', {})
@@ -129,7 +128,19 @@ class ResultUrlForm(_BasePaymentForm):
         (7, u'СКО частично оплачен'),
         (5, u'СКО полностью оплачен'),
         (6, u'Cумма заблокирована на СКО, ожидается запрос на списание'),
+        (8, u'По СКО был произведен возврат'),
     ]
+
+    RECURRING_STATE_ACTIVATED = 'Activated'
+    RECURRING_STATE_DEACTIVATED = 'Deactivated'
+    RECURRING_STATE_PAYED = 'Payed'
+    RECURRING_STATE_ERROR = 'Error'
+    RECURRING_STATE_CHOICES = (
+        (RECURRING_STATE_ACTIVATED, RECURRING_STATE_ACTIVATED),
+        (RECURRING_STATE_DEACTIVATED, RECURRING_STATE_DEACTIVATED),
+        (RECURRING_STATE_PAYED, RECURRING_STATE_PAYED),
+        (RECURRING_STATE_ERROR, RECURRING_STATE_ERROR),
+    )
 
     paymentId = forms.CharField(label=u'IntellectMoney Payment ID')
     paymentData = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M:%S'])
@@ -137,6 +148,7 @@ class ResultUrlForm(_BasePaymentForm):
     eshopAccount = forms.CharField()
     hash = forms.CharField()
     secretKey = forms.CharField()
+    reccuringState = forms.ChoiceField(choices=RECURRING_STATE_CHOICES, required=False)
 
     def __init__(self, *args, **kwargs):
         super(ResultUrlForm, self).__init__(*args, **kwargs)
@@ -164,10 +176,7 @@ class ResultUrlForm(_BasePaymentForm):
 
 class AcceptingForm(_BaseForm):
 
-    ACTION_CHOICES = [
-        ('Refund', 'Refund'),
-        ('ToPaid', 'ToPaid')
-    ]
+    ACTION_CHOICES = [('Refund', 'Refund'), ('ToPaid', 'ToPaid')]
 
     action = forms.ChoiceField(choices=ACTION_CHOICES)
     secretKey = forms.CharField()

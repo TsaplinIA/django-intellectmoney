@@ -5,8 +5,8 @@ from intellectmoney import settings
 
 
 def checkHashOnReceiveResult(data):
-    hash = getHashOnReceiveResult(data)
-    return  hash == data.get('hash')
+    data_hash = getHashOnReceiveResult(data)
+    return data_hash == data.get('hash')
 
 
 def getHashOnReceiveResult(data):
@@ -22,13 +22,21 @@ def getHashOnReceiveResult(data):
     userEmail = data.get('userEmail', '')
     paymentData = data.get('paymentData')
     key = '%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s' % (
-         eshopId, orderId, serviceName, eshopAccount, recipientAmount,
-         recipientCurrency, paymentStatus, userName, userEmail, paymentData,
-         secretKey,
+        eshopId,
+        orderId,
+        serviceName,
+        eshopAccount,
+        recipientAmount,
+        recipientCurrency,
+        paymentStatus,
+        userName,
+        userEmail,
+        paymentData,
+        secretKey,
     )
     key = key.encode('windows-1251', errors='ignore')
-    hash = hashlib.md5(key).hexdigest()
-    return hash
+    key_hash = hashlib.md5(key).hexdigest()
+    return key_hash
 
 
 def getHashOnRequest(data):
@@ -36,11 +44,28 @@ def getHashOnRequest(data):
     serviceName = data.get('serviceName', '')
     eshopId = data.get('eshopId')
     orderId = data.get('orderId')
-    purchaseAmount = data.get('recipientAmount')
-    currency = data.get('recipientCurrency')
-    key = '%s::%s::%s::%s::%s::%s' % (
-         eshopId, orderId, serviceName, purchaseAmount, currency, secretKey,
-    )
+    recipientAmount = data.get('recipientAmount')
+    recipientCurrency = data.get('recipientCurrency')
+    recurringType = data.get('recurringType')
+    if recurringType:
+        key = '%s::%s::%s::%s::%s::%s::%s' % (
+            eshopId,
+            orderId,
+            serviceName,
+            recipientAmount,
+            recipientCurrency,
+            recurringType,
+            secretKey,
+        )
+    else:
+        key = '%s::%s::%s::%s::%s::%s' % (
+            eshopId,
+            orderId,
+            serviceName,
+            recipientAmount,
+            recipientCurrency,
+            secretKey,
+        )
     key = key.encode('windows-1251', errors='ignore')
-    hash = hashlib.md5(key).hexdigest()
-    return hash
+    key_hash = hashlib.md5(key).hexdigest()
+    return key_hash
