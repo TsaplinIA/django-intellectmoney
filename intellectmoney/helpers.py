@@ -21,7 +21,7 @@ def getHashOnReceiveResult(data):
     userName = data.get('userName', '')
     userEmail = data.get('userEmail', '')
     paymentData = data.get('paymentData')
-    key = '%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s' % (
+    key = '%s::%s::%s::%s::%.2f::%s::%s::%s::%s::%s::%s' % (
         eshopId,
         orderId,
         serviceName,
