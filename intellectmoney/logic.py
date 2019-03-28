@@ -132,12 +132,14 @@ def setScheduledOperation(user_token, payment_id, amount, repeat_plan, params=No
         data.update(params)
 
     result = _make_api_request(settings.SET_SHEDULED_OPERATION_URL, data)
+    result = _parse_response(result)
     return result
 
 
 def editScheduledOperation(user_token, operation_id, data):
     data['OperationId'] = operation_id
     result = _make_api_request(settings.SET_SHEDULED_OPERATION_URL, data)
+    result = _parse_response(result)
     return result
 
 
@@ -148,4 +150,5 @@ def getScheduledOperation(user_token, skip=0, take=10):
         'Take': take,
     }
     result = _make_api_request(settings.GET_SHEDULED_OPERATION_URL, data)
+    result = _parse_response(result)
     return result
